@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Student Activity Hub</title>
+<style>
+:root{
+  --bg:#f3f7ff; --ink:#14213d; --panel:#ffffff; --line:#c5d1ea; --soft:#e6eefc; --focus:#f2a900;
+  --band1:#2f6fe4; --band2:#7a3fe0;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); color-scheme:light;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#0f1730; --ink:#eef2ff; --panel:#18234a; --line:#34457d; --soft:#22305f; --band1:#2c58b8; --band2:#5a2fb0; color-scheme:dark; } }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",system-ui,Arial,sans-serif;font-size:19px;line-height:1.45}
+.wrap{max-width:980px;margin:0 auto;padding:14px 14px 44px}
+.band{background:linear-gradient(135deg,var(--band1),var(--band2));color:#fff;border-radius:22px;padding:20px 22px}
+.band h1{margin:0;font-size:36px;line-height:1.15}
+.band p{margin:6px 0 0;font-size:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:18px}
+a.card{display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);background:var(--panel);border:3px solid var(--line);border-top:12px solid var(--c);border-radius:20px;padding:16px 18px;min-height:150px}
+a.card:hover{background:var(--soft)}
+a.card:focus-visible{outline:4px solid var(--focus);outline-offset:3px}
+a.card b{font-size:25px}
+a.card span{font-size:18px}
+a.card .go{margin-top:auto;font-weight:800;color:var(--c)}
+.note{margin-top:22px;font-size:17px;opacity:.85}
+@media (max-width:560px){ .band h1{font-size:29px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="band"><h1>Student Activity Hub</h1><p>Pick an activity to get started.</p></header>
+  <main class="grid">
+    <a class="card" style="--c:#2f6fe4" href="social-studies.html"><b>Little Social Studies</b><span>Community, money, maps, government, history, and cultures. Easy and harder activities, plus weekly topics.</span><span class="go">Open</span></a>
+    <a class="card" style="--c:#2f9e44" href="science-lab.html"><b>Little Science Lab</b><span>Hands-on science labs about space, weather, plants, animals, your body, and more.</span><span class="go">Open</span></a>
+    <a class="card" style="--c:#7a3fe0" href="word-wall.html"><b>Word Wall</b><span>Learn five new words each week, then play games with them.</span><span class="go">Open</span></a>
+    <a class="card" style="--c:#d6336c" href="draw.html"><b>Draw</b><span>Draw and color with pens, brushes, stickers, shapes, and coloring pages.</span><span class="go">Open</span></a>
+    <a class="card" style="--c:#1b3a8a" href="constitution-test.html"><b>Constitution Test Study Hub</b><span>Study the U.S. and Illinois Constitutions with flashcards, quizzes, games, and a practice test.</span><span class="go">Open</span></a>
+  </main>
+  <p class="note">Tip: use your browser’s Back button to come back to this page.</p>
+</div>
+</body>
+</html>

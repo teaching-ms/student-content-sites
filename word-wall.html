@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Word Wall</title>
+<style>
+:root{
+  --bg:#f3f7ff; --ink:#14213d; --panel:#ffffff; --line:#c5d1ea; --blue:#2f6fe4; --blue-ink:#ffffff; --soft:#e6eefc;
+  --ok:#1b8a3a; --okbg:#dff5e6; --miss:#6b7280; --focus:#f2a900;
+  --c1:#2f6fe4; --c2:#7a3fe0; --c3:#e8730c; --c4:#0e9aa7; --c5:#d6336c; --c6:#2f9e44;
+  --band1:#2f6fe4; --band2:#7a3fe0;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1730; --ink:#eef2ff; --panel:#18234a; --line:#34457d; --soft:#22305f; --okbg:#173a26; --ok:#6fdc8c; --miss:#9aa3b8; --blue:#6f9bff; --blue-ink:#0b1430; --band1:#2c58b8; --band2:#5a2fb0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{ --bg:#0f1730; --ink:#eef2ff; --panel:#18234a; --line:#34457d; --soft:#22305f; --okbg:#173a26; --ok:#6fdc8c; --miss:#9aa3b8; --blue:#6f9bff; --blue-ink:#0b1430; --band1:#2c58b8; --band2:#5a2fb0; color-scheme:dark; }
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",system-ui,Arial,sans-serif;font-size:18px;line-height:1.45}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:4px solid var(--focus);outline-offset:2px}
+.wrap{max-width:1000px;margin:0 auto;padding:12px 14px 40px}
+.band{background:linear-gradient(135deg,var(--band1),var(--band2));color:#fff;border-radius:22px;padding:16px 18px;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between}
+.band h1{margin:0;font-size:34px;letter-spacing:.5px}
+.band p{margin:2px 0 0;opacity:.95}
+.weekbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.weekbar label{display:flex;align-items:center;gap:8px;font-weight:700}
+.weekbar select{min-height:48px;border-radius:12px;border:3px solid #fff;background:#fff;color:#14213d;padding:0 10px;font-weight:700}
+.nb{min-height:48px;padding:0 16px;border-radius:12px;border:3px solid #fff;background:transparent;color:#fff;font-weight:700}
+.nb:disabled{opacity:.45;cursor:default}
+.opts{display:flex;flex-wrap:wrap;gap:8px 22px;margin:12px 2px 4px}
+.opts label{display:flex;align-items:center;gap:8px;font-weight:700}
+.opts input{width:24px;height:24px;accent-color:var(--blue)}
+h2{font-size:26px;margin:22px 0 10px}
+.wall{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.wcard{background:var(--panel);border:3px solid var(--line);border-radius:18px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.wcard:nth-child(5n+1){border-top:10px solid var(--c1)}
+.wcard:nth-child(5n+2){border-top:10px solid var(--c2)}
+.wcard:nth-child(5n+3){border-top:10px solid var(--c3)}
+.wcard:nth-child(5n+4){border-top:10px solid var(--c4)}
+.wcard:nth-child(5n+5){border-top:10px solid var(--c5)}
+.wtop{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.wcard h3{margin:0;font-size:28px}
+.pos{background:var(--soft);border:2px solid var(--line);border-radius:999px;padding:2px 12px;font-weight:700;font-size:16px}
+.def{margin:0;font-size:19px}
+.wall.cover .def{display:none}
+.wall.cover .wcard.peek .def{display:block}
+.wall.cover .wcard{cursor:pointer}
+.hint{margin:0;font-size:15px;opacity:.8}
+.small{min-height:44px;padding:0 14px;border-radius:12px;border:3px solid var(--line);background:var(--panel);font-weight:700;align-self:flex-start}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.tile{display:flex;gap:12px;align-items:center;text-align:left;background:var(--panel);border:3px solid var(--line);border-left:12px solid var(--gc);border-radius:18px;padding:12px 14px;min-height:84px}
+.tile:hover{background:var(--soft)}
+.tile .ico{font-size:34px;width:46px;text-align:center}
+.tile b{display:block;font-size:21px}
+.tile span span{display:block;font-size:16px;opacity:.85}
+.gamebar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:6px 0 10px}
+.gamebar h2{margin:0}
+.panel{background:var(--panel);border:3px solid var(--line);border-radius:22px;padding:16px;min-height:300px}
+.prog{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-weight:700;flex-wrap:wrap}
+.bar{flex:1;min-width:120px;height:14px;background:var(--soft);border:2px solid var(--line);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--blue);width:0;transition:width .25s}
+.streak{background:var(--soft);border:2px solid var(--line);border-radius:999px;padding:2px 12px}
+.prompt{font-size:38px;font-weight:800;text-align:center;margin:10px 0 2px;word-break:break-word}
+.prompt.long{font-size:24px;font-weight:700}
+.sub{text-align:center;margin:0 0 14px;font-size:18px;opacity:.9}
+.choices{display:grid;gap:10px;max-width:760px;margin:0 auto}
+.choice{min-height:60px;padding:10px 16px;border-radius:16px;border:3px solid var(--line);background:var(--panel);text-align:left;font-size:20px;font-weight:700}
+.choice:hover:not(:disabled){background:var(--soft);border-color:var(--blue)}
+.choice.miss{opacity:.5;border-style:dashed;color:var(--miss)}
+.choice.ok{background:var(--okbg);border-color:var(--ok)}
+.choice:disabled{cursor:default}
+.msg{min-height:56px;text-align:center;font-size:20px;font-weight:700;margin:14px auto 6px;max-width:760px}
+.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.btn{min-height:54px;padding:0 22px;border-radius:14px;border:3px solid var(--blue);background:var(--blue);color:var(--blue-ink);font-weight:800;font-size:20px}
+.btn.alt{background:var(--panel);color:var(--ink);border-color:var(--line)}
+.slots{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0 16px}
+.slot{width:46px;height:54px;border-radius:10px;border:3px solid var(--line);background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800}
+.slot.gap{width:20px;border:0;background:transparent}
+.slot.done{background:var(--okbg);border-color:var(--ok)}
+.bank{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:6px 0 10px}
+.letter{width:54px;height:58px;border-radius:12px;border:3px solid var(--blue);background:var(--panel);font-size:28px;font-weight:800}
+.letter:disabled{opacity:.25;border-color:var(--line)}
+.defline{text-align:center;font-size:22px;margin:4px auto 8px;max-width:760px}
+.mem{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.card{min-height:130px;border-radius:16px;border:3px solid var(--line);background:var(--blue);color:var(--blue-ink);font-size:36px;font-weight:800;padding:8px;display:flex;align-items:center;justify-content:center;text-align:center}
+.card.up{background:var(--panel);color:var(--ink);font-size:16px;font-weight:700;line-height:1.3}
+.card.up.isword{font-size:24px}
+.card.matched{background:var(--okbg);border-color:var(--ok);color:var(--ink);font-size:16px;font-weight:700}
+.card.matched.isword{font-size:24px}
+.end{text-align:center;padding:20px 0}
+.end h3{font-size:30px;margin:0 0 8px}
+.end p{font-size:22px;margin:4px 0 16px}
+details.teach{margin-top:26px;background:var(--panel);border:3px solid var(--line);border-radius:16px;padding:10px 14px}
+details.teach summary{font-weight:800;cursor:pointer;min-height:36px}
+details.teach li{margin:6px 0}
+@media (max-width:560px){ .band h1{font-size:28px} .prompt{font-size:32px} .slot{width:36px;height:46px;font-size:22px} .letter{width:44px;height:50px;font-size:24px} }
+@media (prefers-reduced-motion: reduce){ .bar i{transition:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="band">
+    <div><h1>Word Wall</h1><p>Five new words every week. Learn them, then play.</p></div>
+    <div class="weekbar">
+      <button class="nb" id="prev" type="button">Back</button>
+      <label>Week <select id="week" aria-label="Choose a week"></select></label>
+      <button class="nb" id="next" type="button">Next</button>
+    </div>
+  </header>
+  <div class="opts">
+    <label><input type="checkbox" id="review"> Review earlier weeks too</label>
+    <label><input type="checkbox" id="cover"> Cover the meanings</label>
+  </div>
+
+  <section id="home">
+    <h2 id="wallTitle">This week’s words</h2>
+    <div class="wall" id="wall"></div>
+    <p class="hint" id="coverHint" hidden>Tap a card to peek at its meaning.</p>
+    <h2>Games</h2>
+    <div class="tiles" id="tiles"></div>
+    <details class="teach"><summary>Teacher notes</summary>
+      <ul>
+        <li>Pick the week at the top. The words match the weekly Word Wall post in Google Classroom.</li>
+        <li><b>Review earlier weeks too</b> mixes in words from weeks before the one you picked.</li>
+        <li><b>Cover the meanings</b> lets students try to remember a meaning before they tap to check.</li>
+        <li>Wrong answers can be tried again, and a “Show me” button appears after two misses. Nothing is timed.</li>
+        <li>Some words can be more than one part of speech. The games use the part of speech listed on the Word Wall.</li>
+        <li>Nothing a student does is saved or sent anywhere. The page only remembers which week was picked on that device.</li>
+        <li>To open on a certain week by default, change <code>DEFAULT_WEEK</code> near the top of the script.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section id="game" hidden>
+    <div class="gamebar"><h2 id="gameTitle"></h2><button class="btn alt" id="backHome" type="button">Back to games</button></div>
+    <div class="panel" id="stage" aria-live="polite"></div>
+  </section>
+</div>
+<script>
+(function(){
+'use strict';
+const DEFAULT_WEEK=1;
+const RAW=`1
+Analyze|verb|To look at something closely to understand it.
+Context|noun|The background information that helps explain an event or word.
+Evidence|noun|Facts or proof that show something is true.
+Identify|verb|To point out or name what something is.
+Summarize|verb|To retell the main points in a short way.
+2
+Compare|verb|To look for ways things are alike.
+Contrast|verb|To look for ways things are different.
+Describe|verb|To explain what something looks, feels, or sounds like.
+Predict|verb|To make an educated guess about what will happen next.
+Support|verb|To back up an answer with facts or examples.
+3
+Conclude|verb|To reach an answer or decision after thinking about the facts.
+Impact|noun|The strong effect or result of an action.
+Source|noun|Where information comes from (a book, website, or person).
+Sequence|noun|The order in which things happen.
+Explain|verb|To make something clear or easy to understand.
+4
+Claim|noun|A statement that you believe is true, which needs proof.
+Argument|noun|A reason or set of reasons given to persuade others.
+Define|verb|To state the exact meaning of a word or idea.
+Illustrate|verb|To show or explain something using examples or pictures.
+Evaluate|verb|To judge the value, quality, or importance of something.
+5
+Cause|noun|The reason why something happens.
+Effect|noun|The result or outcome of a cause.
+Main Idea|noun|What a text or paragraph is mostly about.
+Details|noun|Small facts or pieces of information that give more context.
+Opinion|noun|What someone thinks or feels, which cannot be proven true.
+6
+Fact|noun|A statement that is 100% true and can be proven.
+Purpose|noun|The reason why something is created or done.
+Structure|noun|The way something is built, organized, or put together.
+Theme|noun|The main lesson or moral message of a story.
+Tone|noun|The attitude or mood an author shows in writing.
+7
+Infer|verb|To figure something out using clues and what you already know.
+Point of View|noun|The perspective or position from which a story is told.
+Connect|verb|To join or show how two ideas relate to each other.
+Revise|verb|To make changes to improve writing.
+Clarify|verb|To make something clearer and easier to understand.
+8
+Objective|noun|A goal or target you are working to achieve.
+Solution|noun|The answer to a problem.
+Perspective|noun|A particular way of viewing or thinking about something.
+Strategy|noun|A careful plan for achieving a goal.
+Reflect|verb|To think deeply back on what you have learned or done.
+9
+Interpret|verb|To explain the meaning of information, words, or actions.
+Paraphrase|verb|To restate text or speech in your own words.
+Justify|verb|To prove or show something to be right or reasonable.
+Organize|verb|To arrange items or ideas into a structured order.
+Hypothesis|noun|A testable prediction or educated guess.
+10
+Variable|noun|An element, feature, or factor that can change.
+Demonstrate|verb|To clearly show or explain how something works.
+Formulate|verb|To create or devise a plan, strategy, or idea.
+Distinguish|verb|To recognize or point out the differences between things.
+Elaborate|verb|To add more details or expand upon an idea.
+11
+Examine|verb|To inspect or observe something very carefully.
+Chronological|adj|Arranged in the order of time that events happened.
+Bias|noun|A preference or prejudice toward one side of an issue.
+Credible|adj|Able to be believed, trusted, or relied upon.
+Significant|adj|Important, meaningful, or deserving of attention.
+12
+Category|noun|A group of people or things with shared characteristics.
+Critique|verb|To review and evaluate something critically.
+Assess|verb|To evaluate or estimate the nature, quality, or ability of something.
+Prioritize|verb|To treat something as more important than other things.
+Synthesize|verb|To combine different ideas to form a single complex idea.
+13
+Concept|noun|An abstract or general idea.
+Component|noun|A part or element of a larger whole.
+Principle|noun|A fundamental truth or rule that serves as a foundation.
+Theory|noun|A well-tested system of ideas intended to explain something.
+Method|noun|A particular procedure for accomplishing or approaching something.
+14
+Relate|verb|To show or make a connection between two or more things.
+Relevant|adj|Closely connected or appropriate to the topic at hand.
+Irrelevant|adj|Not connected with or relevant to something.
+Valid|adj|Having a sound basis in logic or fact; reasonable.
+Invalid|adj|Not correct or grounded in logic and sound proof.
+15
+Modify|verb|To make partial or slight changes to something.
+Adapt|verb|To adjust or modify to fit new conditions or environments.
+Generate|verb|To produce, create, or cause something to exist.
+Incorporate|verb|To include or combine something as part of a whole.
+Integrate|verb|To bring different parts together into a unified whole.
+16
+Aspect|noun|A particular part or feature of something.
+Perspective|noun|A particular attitude toward or way of regarding something.
+Viewpoint|noun|A position or perspective from which something is considered.
+Stance|noun|An attitude or position taken on an issue.
+Counterargument|noun|An argument or set of reasons opposed to an idea.
+17
+Rebuttal|noun|A response that proves an opposing argument to be wrong.
+Cite|verb|To quote or refer to a source as evidence.
+Plagiarism|noun|Taking someone else's work or ideas and passing them off as one's own.
+Plausible|adj|Seeming reasonable, probable, or likely to be true.
+Implausible|adj|Not seeming reasonable, probable, or likely.
+18
+Abstract|adj|Existing in thought or as an idea but not having physical form.
+Concrete|adj|Specific, definite, and tangible rather than abstract.
+Implicit|adj|Implied though not plainly expressed.
+Explicit|adj|Stated clearly and in detail, leaving no room for confusion.
+Ambiguous|adj|Open to more than one interpretation; unclear.
+19
+Coherent|adj|Logical, consistent, and well-organized.
+Incoherent|adj|Expressed in an incomprehensible or confusing way.
+Concise|adj|Giving a lot of information clearly and in a few words.
+Verbose|adj|Using or expressed in more words than are needed.
+Fluency|noun|The ability to speak or write smoothly and easily.
+20
+Analogy|noun|A comparison between two things to help explain an idea.
+Metaphor|noun|A direct comparison stating one thing IS another.
+Simile|noun|A comparison of two things using 'like' or 'as'.
+Personification|noun|Giving human qualities to non-human objects or ideas.
+Alliteration|noun|The repetition of starting consonant sounds in words.
+21
+Hyperbole|noun|An extreme exaggeration not meant to be taken literally.
+Irony|noun|The contrast between expectation and reality.
+Symbolism|noun|The use of symbols to represent ideas or qualities.
+Imagery|noun|Visually descriptive or figurative language that appeals to the senses.
+Foreshadow|verb|To give a hint of what is to come later in a story.
+22
+Protagonist|noun|The main character in a story or literary work.
+Antagonist|noun|A character or force in conflict with the main character.
+Conflict|noun|A struggle between opposing forces in a story.
+Climax|noun|The turning point or most intense moment of a story.
+Resolution|noun|The final unfolding or solution of a story's plot.
+23
+Setting|noun|The time and place in which a story occurs.
+Plot|noun|The main events that make up a story's sequence.
+Dialogue|noun|Conversation between two or more people or characters.
+Monologue|noun|A long speech given by a single character.
+Narrator|noun|The person or character telling the story.
+24
+Genre|noun|A category or type of literature, art, or music.
+Fiction|noun|Literature created from the imagination, not presented as fact.
+Nonfiction|noun|Prose writing based on facts, real events, and real people.
+Biography|noun|An account of someone's life written by someone else.
+Autobiography|noun|An account of a person's life written by that person.
+25
+Data|noun|Facts, statistics, or items of information collected for analysis.
+Quantitative|adj|Relating to, measuring, or measured by numbers.
+Qualitative|adj|Relating to quality or characteristics rather than quantity.
+Trend|noun|A general direction in which something is developing or changing.
+Pattern|noun|A repeated or regular way in which something happens or is done.
+26
+Correlation|noun|A mutual relationship or connection between two or more things.
+Causation|noun|The action of causing something to happen.
+Outlier|noun|A data point that differs significantly from other observations.
+Mean|noun|The average value calculated by dividing the sum by the count.
+Median|noun|The middle value in a set of ordered numbers.
+27
+Mode|noun|The value that appears most frequently in a data set.
+Range|noun|The difference between the highest and lowest values in a data set.
+Probability|noun|The likelihood or chance of a specific event occurring.
+Proportion|noun|A part, share, or number considered in comparative relation to a whole.
+Ratio|noun|The quantitative relationship between two amounts showing size comparisons.
+28
+Estimate|verb|To roughly calculate or judge the value, number, or quantity.
+Approximate|adj|Close to the actual, but not completely accurate or exact.
+Precise|adj|Exact, accurate, and clearly defined.
+Accurate|adj|Correct in all details; exact and free from error.
+Error|noun|A mistake or the measure of difference from an exact value.
+29
+Hypothesize|verb|To put forward an idea or proposition as a premise to be tested.
+Experiment|noun|A scientific procedure undertaken to make a discovery or test a hypothesis.
+Observation|noun|The action of closely monitoring or noting something.
+Inference|noun|A conclusion reached on the basis of evidence and reasoning.
+Variable|noun|A factor, trait, or condition that can exist in differing amounts.
+30
+Control Group|noun|The group in an experiment that receives no special treatment.
+Constant|noun|A condition that must remain the same throughout an experiment.
+Replicate|verb|To repeat or duplicate an experiment to verify results.
+Verify|verb|To make sure or demonstrate that something is true or accurate.
+Validate|verb|To check or prove the accuracy or validity of something.
+31
+Perspective|noun|A particular way of viewing or thinking about something.
+Contextualize|verb|To place an event or idea within its surrounding setting.
+Primary Source|noun|An immediate, first-hand account of a topic from someone who experienced it.
+Secondary Source|noun|A document or work created later by someone who did not experience it directly.
+Artifact|noun|An object made by a human being, typically of historical interest.
+32
+Culture|noun|The customs, arts, and social institutions of a particular group of people.
+Society|noun|A community of people living together in an ordered group.
+Economy|noun|The system of production, distribution, and consumption of goods and services.
+Government|noun|The governing body of a nation, state, or community.
+Policy|noun|A course or principle of action adopted or proposed by an organization or government.
+33
+Incentive|noun|A thing that motivates or encourages someone to do something.
+Scarcity|noun|The state of being in short supply; a shortage.
+Resource|noun|A stock or supply of money, materials, staff, or other assets.
+Supply|noun|The total amount of a specific good or service available to consumers.
+Demand|noun|A consumer's desire and willingness to pay a price for a good or service.
+34
+Diversity|noun|The state of having variety or including different types of people or things.
+Equity|noun|The quality of being fair and impartial.
+Inclusion|noun|The practice of providing equal access and opportunities to everyone.
+Collaboration|noun|The action of working with someone to produce or create something.
+Communication|noun|The imparting or exchanging of information or news.
+35
+Innovate|verb|To make changes in something established by introducing new methods or ideas.
+Efficiency|noun|The state of achieving maximum productivity with minimum wasted effort.
+Productivity|noun|The effectiveness of productive effort, measured by rate of output.
+Goal|noun|The object of a person's ambition or effort; an aimed-at result.
+Milestone|noun|An important stage or event in the development of something.
+36
+Resilience|noun|The capacity to withstand or recover quickly from difficulties.
+Perseverance|noun|Persistence in doing something despite difficulty or delay.
+Accountability|noun|The obligation or willingness to accept responsibility for one's actions.
+Integrity|noun|The quality of being honest and having strong moral principles.
+Empathy|noun|The ability to understand and share the feelings of another.
+37
+Synthesize|verb|To combine various components into a single coherent system.
+Consolidate|verb|To combine a number of things into a single more effective whole.
+Transform|verb|To make a thorough or dramatic change in form, appearance, or character.
+Transition|noun|The process or a period of changing from one state to another.
+Evolution|noun|The gradual development of something, especially from a simple to complex form.
+38
+Criteria|noun|Standards or rules by which something may be judged or decided.
+Benchmark|noun|A standard or point of reference against which things may be measured.
+Standard|noun|A level of quality or attainment used as a measure or model.
+Rubric|noun|A scoring guide used to evaluate performance, work, or assignments.
+Assessment|noun|The evaluation or estimation of the nature, quality, or ability of something.
+39
+Reflection|noun|Serious thought or consideration given to past experiences or learning.
+Metacognition|noun|Awareness and understanding of one's own thought processes.
+Growth Mindset|noun|The belief that abilities can be developed through dedication and hard work.
+Feedback|noun|Information about performance used as a basis for improvement.
+Mastery|noun|Comprehensive knowledge or skill in a subject or accomplishment.
+40
+Culmination|noun|The highest or final point of something, reached after a long time.
+Achievement|noun|A thing done successfully with effort, skill, or courage.
+Accomplishment|noun|Something that has been achieved successfully.
+Review|verb|To examine or assess something again with the possibility of instituting change.
+Perspective|noun|A balanced view of the relative importance of things gained through experience.`;
+const $=(s,r=document)=>r.querySelector(s);
+const POSN={noun:'Noun',verb:'Verb',adj:'Adjective'};
+const WEEKS={}; let cw=null;
+RAW.trim().split('\n').forEach(l=>{ l=l.trim(); if(!l)return; if(/^\d+$/.test(l)){ cw=+l; WEEKS[cw]=[]; } else { const a=l.split('|'); WEEKS[cw].push({w:a[0],pos:a[1],d:a[2],wk:cw}); } });
+const NW=Object.keys(WEEKS).length;
+let week=DEFAULT_WEEK; try{ const s=localStorage.getItem('ww_week'); if(s&&WEEKS[+s]) week=+s; }catch(e){}
+function uniq(list){ const m=new Map(); list.forEach(x=>m.set(x.w.toLowerCase(),x)); return Array.from(m.values()); }
+function upTo(n){ let a=[]; for(let i=1;i<=n;i++) a=a.concat(WEEKS[i]); return uniq(a); }
+const ALL=upTo(NW);
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function same(a,b){ return a.w.toLowerCase()===b.w.toLowerCase(); }
+function targets(){
+  const cur=WEEKS[week];
+  if(!$('#review').checked||week===1) return shuffle(cur);
+  const older=upTo(week-1).filter(x=>!cur.some(c=>same(c,x)));
+  return shuffle(cur.concat(shuffle(older).slice(0,5)));
+}
+function distract(t,field,n){
+  let pool=shuffle(upTo(week).filter(x=>!same(x,t)&&x[field]!==t[field]));
+  if(pool.length<n) pool=pool.concat(shuffle(ALL.filter(x=>!same(x,t)&&x[field]!==t[field]&&!pool.includes(x))));
+  const out=[],seen={}; seen[t[field]]=1;
+  for(const x of pool){ if(!seen[x[field]]){ seen[x[field]]=1; out.push(x); } if(out.length>=n) break; }
+  return out;
+}
+function speak(text){ try{ if(window.speechSynthesis){ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.rate=0.9; speechSynthesis.speak(u); } }catch(e){} }
+function el(tag,cls,txt){ const e=document.createElement(tag); if(cls)e.className=cls; if(txt!==undefined)e.textContent=txt; return e; }
+
+/* ----- header and word wall ----- */
+const sel=$('#week');
+for(let i=1;i<=NW;i++){ const o=el('option',null,String(i)); o.value=i; sel.appendChild(o); }
+function renderWall(){
+  sel.value=week; $('#prev').disabled=week<=1; $('#next').disabled=week>=NW;
+  $('#wallTitle').textContent='Week '+week+' words';
+  const wall=$('#wall'); wall.innerHTML='';
+  WEEKS[week].forEach(x=>{
+    const c=el('article','wcard'), top=el('div','wtop');
+    top.appendChild(el('h3',null,x.w)); top.appendChild(el('span','pos',POSN[x.pos]));
+    c.appendChild(top); c.appendChild(el('p','def',x.d));
+    const b=el('button','small','Hear it'); b.type='button'; b.addEventListener('click',e=>{ e.stopPropagation(); speak(x.w+'. '+x.d); });
+    c.appendChild(b);
+    c.addEventListener('click',()=>{ if(wall.classList.contains('cover')) c.classList.toggle('peek'); });
+    wall.appendChild(c);
+  });
+  wall.classList.toggle('cover',$('#cover').checked); $('#coverHint').hidden=!$('#cover').checked;
+}
+function setWeek(n){ week=Math.max(1,Math.min(NW,n)); try{ localStorage.setItem('ww_week',String(week)); }catch(e){} renderWall(); if(!$('#game').hidden) goHome(); }
+sel.addEventListener('change',()=>setWeek(+sel.value));
+$('#prev').addEventListener('click',()=>setWeek(week-1));
+$('#next').addEventListener('click',()=>setWeek(week+1));
+$('#cover').addEventListener('change',renderWall);
+
+/* ----- games list ----- */
+const GAMES=[
+ ['pos','Part of Speech','Is the word a noun, a verb, or an adjective?','🎯','--c1'],
+ ['meaning','Pick the Meaning','See a word. Choose what it means.','💡','--c2'],
+ ['which','Which Word?','Read a meaning. Choose the word.','🔎','--c3'],
+ ['spell','Spell It','Use the letters to spell the word.','🔤','--c4'],
+ ['memory','Memory Match','Match each word to its meaning.','🧠','--c5'],
+ ['mix','Quick Quiz','10 mixed questions. How many can you get right?','⭐','--c6']
+];
+GAMES.forEach(g=>{
+  const b=el('button','tile'); b.type='button'; b.style.setProperty('--gc','var('+g[4]+')');
+  b.innerHTML='<span class="ico" aria-hidden="true">'+g[3]+'</span><span><b></b><span></span></span>';
+  $('b',b).textContent=g[1]; $('span span',b).textContent=g[2];
+  b.addEventListener('click',()=>start(g[0],g[1]));
+  $('#tiles').appendChild(b);
+});
+function goHome(){ $('#game').hidden=true; $('#home').hidden=false; try{speechSynthesis.cancel();}catch(e){} window.scrollTo(0,0); }
+$('#backHome').addEventListener('click',goHome);
+function start(kind,title){
+  $('#home').hidden=true; $('#game').hidden=false; $('#gameTitle').textContent=title; window.scrollTo(0,0);
+  if(kind==='spell') return startSpell(); if(kind==='memory') return startMemory(); startQuiz(kind);
+}
+
+/* ----- quiz games ----- */
+function mkPos(t){ return {t,prompt:t.w,sub:'What part of speech is this word?',choices:['Noun','Verb','Adjective'].map(x=>({label:x,ok:x===POSN[t.pos]})),good:'“'+t.w+'” is a '+POSN[t.pos].toLowerCase()+'. It means: '+t.d}; }
+function mkMeaning(t){ const ds=distract(t,'d',2); return {t,prompt:t.w,sub:'Which meaning matches this word?',choices:shuffle([{label:t.d,ok:true}].concat(ds.map(x=>({label:x.d,ok:false})))),good:'“'+t.w+'” means: '+t.d}; }
+function mkWhich(t){ const ds=distract(t,'w',2); return {t,prompt:t.d,long:true,sub:'Which word matches this meaning?',choices:shuffle([{label:t.w,ok:true}].concat(ds.map(x=>({label:x.w,ok:false})))),good:'“'+t.w+'” means: '+t.d}; }
+let G=null;
+function startQuiz(kind){
+  const T=targets(); let qs;
+  if(kind==='pos') qs=T.map(mkPos); else if(kind==='meaning') qs=T.map(mkMeaning); else if(kind==='which') qs=T.map(mkWhich);
+  else { const mk=[mkPos,mkMeaning,mkWhich]; qs=[]; for(let i=0;i<10;i++) qs.push(mk[i%3](T[i%T.length])); qs=shuffle(qs); }
+  G={kind,qs,i:0,first:0,streak:0}; renderQ();
+}
+function renderQ(){
+  const st=$('#stage'); st.innerHTML=''; const q=G.qs[G.i]; q.misses=0; q.done=false;
+  const pr=el('div','prog'); pr.appendChild(el('span',null,'Question '+(G.i+1)+' of '+G.qs.length));
+  const bar=el('div','bar'); const fill=el('i'); fill.style.width=(G.i/G.qs.length*100)+'%'; bar.appendChild(fill); pr.appendChild(bar);
+  const sk=el('span','streak','In a row: '+G.streak); pr.appendChild(sk); st.appendChild(pr);
+  const p=el('div','prompt'+(q.long?' long':''),q.prompt); st.appendChild(p);
+  const hb=el('button','small','Hear it'); hb.type='button'; hb.style.display='block'; hb.style.margin='0 auto 6px'; hb.addEventListener('click',()=>speak(q.long?q.prompt:q.t.w)); st.appendChild(hb);
+  st.appendChild(el('p','sub',q.sub));
+  const box=el('div','choices'); st.appendChild(box);
+  const msg=el('div','msg'); msg.setAttribute('role','status'); st.appendChild(msg);
+  const act=el('div','actions'); st.appendChild(act);
+  const btns=[];
+  q.choices.forEach(ch=>{
+    const b=el('button','choice',ch.label); b.type='button'; btns.push([b,ch]);
+    b.addEventListener('click',()=>{
+      if(q.done) return;
+      if(ch.ok){ finish(false); b.classList.add('ok'); }
+      else { q.misses++; G.streak=0; sk.textContent='In a row: 0'; b.classList.add('miss'); b.disabled=true; msg.textContent='Not yet. Try again.'; if(q.misses>=2&&!act.firstChild) addShow(); }
+    });
+    box.appendChild(b);
+  });
+  function finish(revealed){
+    q.done=true; btns.forEach(x=>{ x[0].disabled=true; if(x[1].ok) x[0].classList.add('ok'); });
+    if(!revealed&&q.misses===0){ G.first++; G.streak++; } else G.streak=0;
+    sk.textContent='In a row: '+G.streak; msg.textContent=(revealed?'Here it is. ':'Yes! ')+q.good; act.innerHTML='';
+    const n=el('button','btn',G.i+1<G.qs.length?'Next':'See my score'); n.type='button'; n.addEventListener('click',()=>{ G.i++; if(G.i<G.qs.length) renderQ(); else endQuiz(); }); act.appendChild(n); n.focus();
+  }
+  function addShow(){ const s=el('button','btn alt','Show me'); s.type='button'; s.addEventListener('click',()=>finish(true)); act.appendChild(s); }
+}
+function endQuiz(){
+  const st=$('#stage'); st.innerHTML=''; const e=el('div','end');
+  e.appendChild(el('h3',null,'Round complete!'));
+  e.appendChild(el('p',null,'You got '+G.first+' of '+G.qs.length+' right on the first try.'));
+  const a=el('div','actions'); const again=el('button','btn','Play again'); again.type='button'; again.addEventListener('click',()=>startQuiz(G.kind));
+  const home=el('button','btn alt','Back to games'); home.type='button'; home.addEventListener('click',goHome); a.appendChild(again); a.appendChild(home); e.appendChild(a); st.appendChild(e); again.focus();
+}
+
+/* ----- spell it ----- */
+let S=null;
+function startSpell(){ S={words:targets(),i:0,first:0}; renderSpell(); }
+function renderSpell(){
+  const t=S.words[S.i]; const st=$('#stage'); st.innerHTML='';
+  const chars=Array.from(t.w.toUpperCase()); const letters=chars.filter(c=>c!==' ');
+  let order=shuffle(letters.map((c,k)=>k)); let guard=0; while(order.every((v,k)=>letters[v]===letters[k])&&guard++<20) order=shuffle(order);
+  const bank=order.map(k=>({c:letters[k],used:false})); const entered=[]; let state={done:false,hints:0,wrong:0};
+  const pr=el('div','prog'); pr.appendChild(el('span',null,'Word '+(S.i+1)+' of '+S.words.length)); const bar=el('div','bar'); const fill=el('i'); fill.style.width=(S.i/S.words.length*100)+'%'; bar.appendChild(fill); pr.appendChild(bar); st.appendChild(pr);
+  st.appendChild(el('p','sub','Spell the word that fits this meaning. It is a '+POSN[t.pos].toLowerCase()+'.'));
+  st.appendChild(el('p','defline',t.d));
+  const slots=el('div','slots'); st.appendChild(slots);
+  const bankEl=el('div','bank'); st.appendChild(bankEl);
+  const tools=el('div','actions'); st.appendChild(tools);
+  const msg=el('div','msg'); msg.setAttribute('role','status'); st.appendChild(msg);
+  const act=el('div','actions'); st.appendChild(act);
+  function draw(){
+    slots.innerHTML=''; let k=0;
+    chars.forEach(c=>{ if(c===' '){ slots.appendChild(el('div','slot gap')); } else { const s=el('div','slot'+(state.done?' done':''), entered[k]!==undefined?bank[entered[k]].c:''); slots.appendChild(s); k++; } });
+    bankEl.innerHTML='';
+    bank.forEach((b,idx)=>{ const x=el('button','letter',b.c); x.type='button'; x.disabled=b.used||state.done; x.setAttribute('aria-label','Letter '+b.c); x.addEventListener('click',()=>{ if(state.done||b.used) return; b.used=true; entered.push(idx); draw(); check(); }); bankEl.appendChild(x); });
+  }
+  function check(){
+    if(entered.length<letters.length){ msg.textContent=''; return; }
+    const guess=entered.map(i=>bank[i].c).join(''); if(guess===letters.join('')){ done(); } else { state.wrong++; msg.textContent='Not quite. Tap Undo to fix a letter.'; }
+  }
+  function done(){
+    state.done=true; if(state.hints===0&&state.wrong===0) S.first++; draw(); msg.textContent='Yes! “'+t.w+'” is spelled right.'; tools.innerHTML=''; act.innerHTML='';
+    const n=el('button','btn',S.i+1<S.words.length?'Next word':'See my score'); n.type='button'; n.addEventListener('click',()=>{ S.i++; if(S.i<S.words.length) renderSpell(); else endSpell(); }); act.appendChild(n); n.focus();
+  }
+  function tb(label,fn,cls){ const b=el('button','btn '+(cls||'alt'),label); b.type='button'; b.addEventListener('click',fn); tools.appendChild(b); }
+  tb('Hear the word',()=>speak(t.w));
+  tb('Show a letter',()=>{ if(state.done) return; state.hints++; const correct=letters; let bad=entered.findIndex((bi,k)=>bank[bi].c!==correct[k]); if(bad>=0){ entered.splice(bad).forEach(bi=>{ bank[bi].used=false; }); } const next=correct[entered.length]; if(next===undefined) return; const idx=bank.findIndex(b=>!b.used&&b.c===next); if(idx>=0){ bank[idx].used=true; entered.push(idx); } draw(); check(); });
+  tb('Undo',()=>{ if(state.done||!entered.length) return; const i=entered.pop(); bank[i].used=false; msg.textContent=''; draw(); });
+  tb('Clear',()=>{ if(state.done) return; entered.splice(0).forEach(i=>{ bank[i].used=false; }); msg.textContent=''; draw(); });
+  draw();
+}
+function endSpell(){
+  const st=$('#stage'); st.innerHTML=''; const e=el('div','end');
+  e.appendChild(el('h3',null,'Round complete!'));
+  e.appendChild(el('p',null,'You spelled '+S.first+' of '+S.words.length+' with no hints and no mistakes.'));
+  const a=el('div','actions'); const again=el('button','btn','Play again'); again.type='button'; again.addEventListener('click',startSpell);
+  const home=el('button','btn alt','Back to games'); home.type='button'; home.addEventListener('click',goHome); a.appendChild(again); a.appendChild(home); e.appendChild(a); st.appendChild(e); again.focus();
+}
+
+/* ----- memory match ----- */
+function startMemory(){
+  const T=targets().slice(0,5); const cards=shuffle(T.reduce((a,t,k)=>a.concat([{id:k,kind:'w',text:t.w},{id:k,kind:'d',text:t.d}]),[]));
+  const st=$('#stage'); st.innerHTML=''; let first=null,lock=false,tries=0,matched=0;
+  const pr=el('div','prog'); const trEl=el('span',null,'Tries: 0'); const pm=el('span','streak','Pairs found: 0 of '+T.length); pr.appendChild(trEl); pr.appendChild(pm); st.appendChild(pr);
+  st.appendChild(el('p','sub','Flip two cards. Find each word and its meaning.'));
+  const grid=el('div','mem'); st.appendChild(grid); const msg=el('div','msg'); msg.setAttribute('role','status'); st.appendChild(msg);
+  const els=cards.map(c=>{ const b=el('button','card','?'); b.type='button'; b.setAttribute('aria-label','Face-down card'); grid.appendChild(b);
+    b.addEventListener('click',()=>{ if(lock||c.up||c.done) return; flip(c,b,true); if(!first){ first=[c,b]; return; } tries++; trEl.textContent='Tries: '+tries;
+      if(first[0].id===c.id&&first[0].kind!==c.kind){ [first,[c,b]].forEach(x=>{ x[0].done=true; x[1].classList.add('matched'); }); matched++; pm.textContent='Pairs found: '+matched+' of '+T.length; first=null; msg.textContent='Yes! That is a match.'; if(matched===T.length) end(); }
+      else { lock=true; msg.textContent='Not a match. Look again.'; const f=first; first=null; setTimeout(()=>{ flip(f[0],f[1],false); flip(c,b,false); lock=false; msg.textContent=''; },1300); } });
+    return b; });
+  function flip(c,b,up){ c.up=up; b.textContent=up?c.text:'?'; b.classList.toggle('up',up); b.classList.toggle('isword',up&&c.kind==='w'); if(c.done) b.classList.add('isword'); b.setAttribute('aria-label',up?(c.kind==='w'?'Word: ':'Meaning: ')+c.text:'Face-down card'); }
+  els.forEach((b,i)=>{ if(cards[i].kind==='w') b.dataset.k='w'; });
+  function end(){ setTimeout(()=>{ st.innerHTML=''; const e=el('div','end'); e.appendChild(el('h3',null,'You matched them all!')); e.appendChild(el('p',null,'It took '+tries+' tries.')); const a=el('div','actions'); const again=el('button','btn','Play again'); again.type='button'; again.addEventListener('click',startMemory); const home=el('button','btn alt','Back to games'); home.type='button'; home.addEventListener('click',goHome); a.appendChild(again); a.appendChild(home); e.appendChild(a); st.appendChild(e); again.focus(); },900); }
+}
+renderWall();
+})();
+</script>
+</body>
+</html>
